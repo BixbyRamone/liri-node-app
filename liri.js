@@ -5,9 +5,17 @@ let fs = require("fs");
 let input = process.argv[2];
 let requestID = process.argv[3];
 
+logFunction();
+
 const keys = require('./keys.js');
 
-console.log(keys);
+console.log("process.argv[4]: " + process.argv[4]);
+
+if (process.argv[4]) {
+
+	requestID = requestIdManipulator();
+		
+	}
 
 switch (input) {
 
@@ -21,6 +29,10 @@ switch (input) {
 
 	case "movie-this":
 	movieFunction( requestID );
+	break;
+
+	case "do-what-it-says":
+	randTxtFunction();
 	break;
 }
 
@@ -68,6 +80,7 @@ function spotifyFunction( songName ) {
 	// .get('https://accounts.spotify.com/authorize', function(code)){
 	// 	console.log(code);
 	// }
+	spotify.get
 
 	spotify.search({ type: 'track', query: songName }, function(err, data) {
 		console.log(data);
@@ -83,18 +96,13 @@ function spotifyFunction( songName ) {
 
 function movieFunction( movieTitle ) {
 
+	if (!movieTitle) {
+		movieTitle = "Mr Nobody"
+	}
+	
 	request('http://www.omdbapi.com/?apikey=40e9cece&t=' + movieTitle, function (error, response, body) {
 
 		let film = JSON.parse(body);
-		// var filmArray = ['Title', 'Year', 'imdbRating', 'Country', 'Language', 'Plot', 'Actors'];
-
-		// console.log(film.filmArray[0]);
-
-		// for (var i = 0; i < filmArray.length; i++) {
-		// 	let filmAttriubte = filmArray[i];
-		// 	console.log(film.filmAttriubte);
-		// }
-		// console.log(film);
 
 		console.log(film.Title);
 		console.log(film.Year);
@@ -106,4 +114,56 @@ function movieFunction( movieTitle ) {
 
 	});
 
+}
+
+function randTxtFunction() {
+
+	fs.readFile("random.txt", "utf8", function(err, data) {
+		data = data.split(",");
+
+		input = data[0].trim();
+		requestID = data[1].trim();
+
+		switch (input) {
+
+			case "my-tweets":
+			twitterFunction();
+			break;
+
+			case "spotify-this-song":
+			spotifyFunction( requestID );
+			break;
+
+			case "movie-this":
+			movieFunction( requestID );
+			break;
+
+			case "do-what-it-says":
+			randTxtFunction();
+			break;
+		}
+	});
+}
+
+function logFunction() {
+
+	if (!process.argv[3]) {
+		fs.appendFile("log.txt", process.argv[2] + ", ");
+	} else {
+
+	fs.appendFile("log.txt", process.argv[2] + " " + process.argv[3] + ", ");
+
+	}
+}
+
+function requestIdManipulator() {
+
+	let fileName;
+	let wholeInput = process.argv;
+
+	fileName = wholeInput.slice(3, wholeInput.length);
+	fileName = fileName.toString();
+	fileName = fileName.replace(/,/g, " ");
+
+	return fileName;
 }
